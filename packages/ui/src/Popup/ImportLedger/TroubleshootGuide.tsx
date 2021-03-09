@@ -2,19 +2,19 @@ import SvgConnectLedger from '@polymathnetwork/extension-ui/assets/images/connec
 import { SvgInfo, SvgLedgerLogo } from '@polymathnetwork/extension-ui/assets/images/icons';
 import SvgInstallLedgerApp from '@polymathnetwork/extension-ui/assets/images/install-ledger-app.svg';
 import { colors, texts } from '@polymathnetwork/extension-ui/components/themeDefinitions';
+import { Status } from '@polymathnetwork/extension-ui/hooks/useLedger';
 import { Box, Button, Flex, Heading, Icon, Link, Text } from '@polymathnetwork/extension-ui/ui';
 import React from 'react';
 import styled from 'styled-components';
 
 type Props = {
-  ledgerError: string;
+  ledgerStatus: string | null;
   refresh: () => void;
 };
 
-export function TroubleshootGuide ({ ledgerError, refresh }: Props): React.ReactElement | null {
-  const isNoDeviceSelected = /no.*selected/gi.test(ledgerError);
-  const hasRequestDeviceFailed = /failed.*requestDevice/gi.test(ledgerError);
-  const isAppClosed = /not.*open/gi.test(ledgerError);
+export function TroubleshootGuide ({ ledgerStatus, refresh }: Props): React.ReactElement | null {
+  const isDeviceIssue = ledgerStatus === Status.Device || ledgerStatus === Status.Error;
+  const isAppIssue = ledgerStatus === Status.App;
 
   return (
     <Box>
@@ -34,7 +34,7 @@ export function TroubleshootGuide ({ ledgerError, refresh }: Props): React.React
 
       <Box mb='m'>
         <StepList>
-          <Step className={(isNoDeviceSelected || hasRequestDeviceFailed) ? 'active' : ''}>
+          <Step className={isDeviceIssue ? 'active' : ''}>
             <Box my='m'>
               <Box mb='s'>
                 <img src={SvgConnectLedger} />
@@ -50,7 +50,7 @@ export function TroubleshootGuide ({ ledgerError, refresh }: Props): React.React
               </Text>
             </Box>
           </Step>
-          <Step className={isAppClosed ? 'active' : ''}>
+          <Step className={isAppIssue ? 'active' : ''}>
             <Box my='m'>
               <Box mb='s'>
                 <img src={SvgInstallLedgerApp} />
