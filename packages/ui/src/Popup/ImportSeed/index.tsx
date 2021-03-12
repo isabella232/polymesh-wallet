@@ -32,13 +32,15 @@ export const ImportSeed: FC = () => {
         return (
           <AccountDetails
             headerText='Restore your account with your recovery phrase'
+            noHeader={true}
             onBack={prevStep}
             onContinue={importAccount}
             submitText='Restore' />
         );
       default:
         return (
-          <EnterSeed onContinue={nextStep}
+          <EnterSeed noHeader={true}
+            onContinue={nextStep}
             setPhrase={setSeedPhrase} />
         );
     }

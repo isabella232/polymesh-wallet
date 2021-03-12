@@ -7,9 +7,10 @@ import { validateSeed } from '../../messaging';
 export interface Props {
   onContinue: () => void;
   setPhrase: (phrase:string) => void;
+  noHeader?: boolean;
 }
 
-export const EnterSeed: FC<Props> = ({ onContinue, setPhrase }) => {
+export const EnterSeed: FC<Props> = ({ noHeader, onContinue, setPhrase }) => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [validSeed, setValidSeed] = useState(false);
 
@@ -39,10 +40,12 @@ export const EnterSeed: FC<Props> = ({ onContinue, setPhrase }) => {
 
   return (
     <>
-      <Header headerText='Restore your account with your recovery phrase'
+      {!noHeader && <Header headerText='Restore your account with your recovery phrase'
         iconAsset={SvgClipboardListOutline}>
       </Header>
-      <Box mx='s'>
+      }
+      <Box height={306}
+        mx='s'>
         <Box pt='m'>
           <Text color='gray.1'
             variant='b2m'>

@@ -11,10 +11,11 @@ import { ActivityContext } from '../../components';
 import { jsonGetAccountInfo } from '../../messaging';
 
 type Props = {
-  onContinue: (accountJson: KeyringPair$Json, jsonPassword: string, accountName: string) => void
+  onContinue: (accountJson: KeyringPair$Json, jsonPassword: string, accountName: string) => void,
+  noHeader?: boolean
 }
 
-export const UploadVerifyJson: FC<Props> = ({ onContinue }) => {
+export const UploadVerifyJson: FC<Props> = ({ noHeader, onContinue }) => {
   const [filename, setFilename] = useState('');
   const fileRef = useRef() as React.MutableRefObject<HTMLInputElement>;
   const [accountName, setAccountName] = useState('');
@@ -111,7 +112,7 @@ export const UploadVerifyJson: FC<Props> = ({ onContinue }) => {
 
   return (
     <>
-      <Header headerText='Import account from JSON file'
+      { !noHeader && <Header headerText='Import account from JSON file'
         iconAsset={SvgFileLockOutline}>
         <Box>
           <Text color='gray.0'
@@ -119,7 +120,7 @@ export const UploadVerifyJson: FC<Props> = ({ onContinue }) => {
             Upload JSON file with account details below to access via Polymesh Wallet.
           </Text>
         </Box>
-      </Header>
+      </Header> }
       <Box mx='s'>
         <Box pt='m'>
           <Text color='gray.1'

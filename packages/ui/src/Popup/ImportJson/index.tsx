@@ -59,13 +59,15 @@ export const ImportJson: FC = () => {
           <AccountDetails
             defaultName={accountName}
             headerText='Import account using JSON file'
+            noHeader={true}
             onBack={prevStep}
             onContinue={restoreAccount}
             submitText='Import' />
         );
       default:
         return (
-          <UploadVerifyJson onContinue={setJsonData} />
+          <UploadVerifyJson noHeader={true}
+            onContinue={setJsonData} />
         );
     }
   };

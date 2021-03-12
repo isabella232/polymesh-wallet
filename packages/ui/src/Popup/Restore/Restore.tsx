@@ -2,6 +2,8 @@ import { SvgAccountReactivate } from '@polymathnetwork/extension-ui/assets/image
 import { Box, Flex, Header, Text } from '@polymathnetwork/extension-ui/ui';
 import React, { FC, useState } from 'react';
 
+import { ImportJson } from '../ImportJson';
+import { ImportSeed } from '../ImportSeed';
 import { RestoreFromJson } from './RestoreFromJson';
 import { RestoreFromSeed } from './RestoreFromSeed';
 
@@ -17,7 +19,7 @@ export const Restore: FC = () => {
         <Box pt='m'>
           <Text color='brandLightest'
             variant='b2'>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Id risus mauris.
+            Choose one of the following account import methods.
           </Text>
         </Box>
         <Flex mt='m'>
@@ -42,8 +44,8 @@ export const Restore: FC = () => {
         </Flex>
       </Header>
       <Box>
-        {currentMethod === 'SEED' && <RestoreFromSeed />}
-        {currentMethod === 'JSON' && <RestoreFromJson />}
+        {currentMethod === 'SEED' && <ImportSeed />}
+        {currentMethod === 'JSON' && <ImportJson />}
       </Box>
     </>
   );
