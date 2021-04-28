@@ -144,7 +144,7 @@ export default function Popup (): React.ReactElement {
               width={20} />
             <Box ml='s'>No internet connection</Box>
           </Flex>
-          , { toastId: 'offline', autoClose: false, closeButton: false });
+          , { toastId: 'offline', autoClose: false, closeButton: true });
       }
     });
   }, []);
@@ -215,7 +215,10 @@ export default function Popup (): React.ReactElement {
   //   B1) Accounts list is empty. ie this an empty wallet, or
   //   B2) Redux store is populated.
   const isReady = status?.apiStatus !== 'connecting' &&
-  (status?.populated[networkState.selected] || accounts?.length === 0 || status?.apiStatus === 'error');
+  (
+  // status?.populated[networkState.selected] ||
+
+    accounts?.length === 0 || status?.apiStatus === 'error');
 
   return (
     <Loading>
@@ -225,8 +228,7 @@ export default function Popup (): React.ReactElement {
         signRequests &&
         proofingRequests &&
         provideUidRequests &&
-        uidRecords &&
-        isReady && (
+        uidRecords && (
         <ActivityContext.Provider value={isBusy}>
           <ActionContext.Provider value={_onAction}>
             <SettingsContext.Provider value={settingsCtx}>

@@ -1,3 +1,4 @@
+import { ApiPromise } from '@polkadot/api';
 import { Option } from '@polkadot/types/codec';
 import { AccountInfo } from '@polkadot/types/interfaces/system';
 import { encodeAddress } from '@polkadot/util-crypto';
@@ -5,7 +6,6 @@ import { union } from 'lodash-es';
 import difference from 'lodash-es/difference';
 import intersection from 'lodash-es/intersection';
 
-import apiPromise, { disconnect } from './external/apiPromise';
 import { DidRecord, IdentityClaim, LinkedKeyInfo } from './external/apiPromise/types';
 import { actions as accountActions } from './store/features/accounts';
 import { actions as identityActions } from './store/features/identities';
@@ -97,20 +97,18 @@ const claims2Record = (didClaims: IdentityClaim[]) => {
   return cdd;
 };
 
-function subscribePolymesh (): () => Promise<void> {
-  function unsubAll (): Promise<void> {
+function subscribePolymesh (api: ApiPromise): () => void {
+  function unsubAll () {
     for (const key in unsubCallbacks) {
       if (unsubCallbacks[key]) {
         try {
           unsubCallbacks[key]();
           delete unsubCallbacks[key];
         } catch (error) {
-          console.error(error);
+          console.error('XXXX unsubAll', error);
         }
       }
     }
-
-    return disconnect();
   }
 
   console.log('Poly: fetching data from chain');
@@ -121,142 +119,142 @@ function subscribePolymesh (): () => Promise<void> {
       console.log('Poly: Selected network', network);
       store.dispatch(statusActions.init());
 
-      apiPromise(network)
-        .then((api) => {
-          // Clear errors
-          store.dispatch(statusActions.apiReady());
+      // apiPromise(network)
+      // .then((api) => {
+      // Clear errors
+      // store.dispatch(statusActions.apiReady());
 
-          // Set the ss58Format that'll be used for address rendering.
-          store.dispatch(networkActions.setFormat(api.registry.chainSS58));
+      // Set the ss58Format that'll be used for address rendering.
+      store.dispatch(networkActions.setFormat(api.registry.chainSS58));
 
-          setTimeout(() => {
-            store.dispatch(statusActions.populated(network));
-          }, populatedDelay);
+      // setTimeout(() => {
+      //   store.dispatch(statusActions.populated(network));
+      // }, populatedDelay);
 
-          let prevAccounts: string[] = [];
-          let prevDids: string[] = [];
-          let activeIssuers: string[] = [];
+      let prevAccounts: string[] = [];
+      let prevDids: string[] = [];
+      let activeIssuers: string[] = [];
 
-          api.query.cddServiceProviders.activeMembers().then(
-            (members) => {
-              activeIssuers = (members as unknown as string[]).map((member) => member.toString());
+      api.query.cddServiceProviders.activeMembers().then(
+        (members) => {
+          activeIssuers = (members as unknown as string[]).map((member) => member.toString());
 
-              /**
+          /**
                * Accounts
                */
-              console.log('Poly: Subscribing to accounts');
-              const accountsSub = observeAccounts((accountsData: KeyringAccountData[]) => {
-                if (network !== getNetwork()) { return; }
+          console.log('Poly: Subscribing to accounts');
+          const accountsSub = observeAccounts((accountsData: KeyringAccountData[]) => {
+            if (network !== getNetwork()) { return; }
 
-                function accountName (_address: string): string | undefined {
-                  return accountsData.find(({ address }) => address === _address)?.name;
-                }
+            function accountName (_address: string): string | undefined {
+              return accountsData.find(({ address }) => address === _address)?.name;
+            }
 
-                const accounts = accountsData.map(({ address }) => address);
+            const accounts = accountsData.map(({ address }) => address);
 
-                // A) Clean subscriptions of previous accounts list
-                prevAccounts.forEach((account) => {
-                  if (unsubCallbacks[account]) {
-                    unsubCallbacks[account]();
-                    delete unsubCallbacks[account];
-                  }
-                });
+            // A) Clean subscriptions of previous accounts list
+            prevAccounts.forEach((account) => {
+              if (unsubCallbacks[account]) {
+                unsubCallbacks[account]();
+                delete unsubCallbacks[account];
+              }
+            });
 
-                // B) Create new subscriptions to:
-                accounts.forEach((account) => {
-                  api.queryMulti([
-                    // 1) Account balance
-                    [api.query.system.account, account],
-                    // 2) Identities linked to account.
-                    [api.query.identity.keyToIdentityIds, account]
-                  ], ([accData, linkedKeyInfo]: [AccountInfo, Option<LinkedKeyInfo>]) => {
-                    // Store account metadata
-                    const { locked, total, transferrable } = accountBalances(accData.data);
+            // B) Create new subscriptions to:
+            accounts.forEach((account) => {
+              api.queryMulti([
+                // 1) Account balance
+                [api.query.system.account, account],
+                // 2) Identities linked to account.
+                [api.query.identity.keyToIdentityIds, account]
+              ], ([accData, linkedKeyInfo]: [AccountInfo, Option<LinkedKeyInfo>]) => {
+                // Store account metadata
+                const { locked, total, transferrable } = accountBalances(accData.data);
 
-                    store.dispatch(accountActions.setAccount({ data: {
-                      address: account,
-                      name: accountName(account),
-                      balance: { total, transferrable, locked }
-                    },
-                    network }));
+                store.dispatch(accountActions.setAccount({ data: {
+                  address: account,
+                  name: accountName(account),
+                  balance: { total, transferrable, locked }
+                },
+                network }));
 
-                    if (linkedKeyInfo.isEmpty) { return; }
+                if (linkedKeyInfo.isEmpty) { return; }
 
-                    const did = linkedKeyInfo.toString();
+                const did = linkedKeyInfo.toString();
 
-                    api.query.identity.didRecords<DidRecord>(did).then((didRecords) => {
-                      const data = _didRecord(did, didRecords);
-                      const params = { did, network, data };
+                api.query.identity.didRecords<DidRecord>(did).then((didRecords) => {
+                  const data = _didRecord(did, didRecords);
+                  const params = { did, network, data };
 
-                      // store.dispatch(identityActions.setIdentitySecKeys(params));
-                      store.dispatch(identityActions.setIdentity(params));
-                    }, apiErrorHandler)
-                      .catch(apiErrorHandler);
-                  }).then((unsub) => {
-                    unsubCallbacks[account] = unsub;
-                  }, apiErrorHandler).catch(apiErrorHandler);
-                });
+                  // store.dispatch(identityActions.setIdentitySecKeys(params));
+                  store.dispatch(identityActions.setIdentity(params));
+                }, (error) => { console.error('XXX1', error); })
+                  .catch((error) => { console.error('XXX2', error); });
+              }).then((unsub) => {
+                unsubCallbacks[account] = unsub;
+              }, (error) => { console.error('XXX3', error); }).catch((error) => { console.error('XXXX', error); apiErrorHandler(error); });
+            });
 
-                prevAccounts = accounts;
-              });
+            prevAccounts = accounts;
+          });
 
-              unsubCallbacks.accounts && unsubCallbacks.accounts();
-              unsubCallbacks.accounts = () => accountsSub.unsubscribe();
+          unsubCallbacks.accounts && unsubCallbacks.accounts();
+          unsubCallbacks.accounts = () => accountsSub.unsubscribe();
 
-              /**
+          /**
                * Identities
                */
-              unsubCallbacks.dids && unsubCallbacks.dids();
-              console.log('Poly: Subscribing to dids');
+          unsubCallbacks.dids && unsubCallbacks.dids();
+          console.log('Poly: Subscribing to dids');
 
-              unsubCallbacks.dids = subscribeDidsList((dids: string[]) => {
-                if (network !== getNetwork()) { return; }
+          unsubCallbacks.dids = subscribeDidsList((dids: string[]) => {
+            if (network !== getNetwork()) { return; }
 
-                const removedDids = difference(prevDids, dids);
+            const removedDids = difference(prevDids, dids);
 
-                removedDids.forEach((did) => {
-                  store.dispatch(identityActions.removeIdentity({ network, did }));
+            removedDids.forEach((did) => {
+              store.dispatch(identityActions.removeIdentity({ network, did }));
 
-                  if (unsubCallbacks[did]) {
-                    unsubCallbacks[did]();
-                    delete unsubCallbacks[did];
-                  }
+              if (unsubCallbacks[did]) {
+                unsubCallbacks[did]();
+                delete unsubCallbacks[did];
+              }
 
-                  if (unsubCallbacks[`${did}:cdd`]) {
-                    unsubCallbacks[`${did}:cdd`]();
-                    delete unsubCallbacks[`${did}:cdd`];
+              if (unsubCallbacks[`${did}:cdd`]) {
+                unsubCallbacks[`${did}:cdd`]();
+                delete unsubCallbacks[`${did}:cdd`];
+              }
+            });
+
+            const promises = dids.map((did) =>
+              api.query.identity.claims.entries({ target: did, claim_type: 'CustomerDueDiligence' }));
+
+            Promise.all(promises)
+              .then((results) =>
+                (results as [unknown, IdentityClaim][][]).map((result) => result.length
+                  ? result.map(([, claim]) => claim)
+                    .filter((claim) => activeIssuers.indexOf(claim.claim_issuer.toString()) !== -1)
+                  : undefined))
+              .then((results) => {
+                dids.forEach((did, index) => {
+                  const result = results[index];
+
+                  if (result) {
+                    const cdd = claims2Record(result);
+
+                    store.dispatch(identityActions.setIdentityCdd({ network, did, cdd }));
                   }
                 });
+              }, (error) => { console.error('XXX4', error); })
+              .catch((error) => { console.error('XXX5', error); });
 
-                const promises = dids.map((did) =>
-                  api.query.identity.claims.entries({ target: did, claim_type: 'CustomerDueDiligence' }));
-
-                Promise.all(promises)
-                  .then((results) =>
-                    (results as [unknown, IdentityClaim][][]).map((result) => result.length
-                      ? result.map(([, claim]) => claim)
-                        .filter((claim) => activeIssuers.indexOf(claim.claim_issuer.toString()) !== -1)
-                      : undefined))
-                  .then((results) => {
-                    dids.forEach((did, index) => {
-                      const result = results[index];
-
-                      if (result) {
-                        const cdd = claims2Record(result);
-
-                        store.dispatch(identityActions.setIdentityCdd({ network, did, cdd }));
-                      }
-                    });
-                  }, apiErrorHandler)
-                  .catch(apiErrorHandler);
-
-                prevDids = dids;
-              });
-            },
-            apiErrorHandler
-          ).catch(apiErrorHandler);
-        }, apiErrorHandler
-        ).catch(apiErrorHandler);
+            prevDids = dids;
+          });
+        },
+        (error) => { console.error('XXX6', error); }
+      ).catch((error) => { console.error('XXX7', error); });
+      // }, (error) => { console.error('XXXX', error); apiErrorHandler(error) }
+      // ).catch((error) => { console.error('XXXX', error); apiErrorHandler(error) } );
     }
   });
 

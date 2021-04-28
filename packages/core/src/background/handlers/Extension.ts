@@ -173,9 +173,7 @@ export default class Extension extends DotExtension {
   }
 
   private polyCallDetailsGet ({ request }: RequestPolyCallDetails): Promise<ResponsePolyCallDetails> {
-    const network = getNetwork();
-
-    return callDetails(request, network);
+    return callDetails(request);
   }
 
   private polyIsDevToggle (): boolean {

@@ -7,7 +7,10 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 import subscribePolymesh, { accountsSynchronizer } from '@polymathnetwork/extension-core';
 import handlers from '@polymathnetwork/extension-core/background/handlers';
 import { PORTS } from '@polymathnetwork/extension-core/constants';
+import Api from '@polymathnetwork/extension-core/external/apiPromise';
 import SchemaService from '@polymathnetwork/extension-core/external/schema';
+import { subscribeIsHydratedAndNetwork } from '@polymathnetwork/extension-core/store/subscribers';
+import { NetworkName } from '@polymathnetwork/extension-core/types';
 import { fatalErrorHandler } from '@polymathnetwork/extension-core/utils';
 
 const loadSchema = () => {
@@ -28,26 +31,33 @@ chrome.runtime.onConnect.addListener((port): void => {
     [PORTS.CONTENT, PORTS.EXTENSION].includes(port.name),
     `Unknown connection from ${port.name}`
   );
-  let polyUnsub: () => Promise<void>;
-  const accountsUnsub = accountsSynchronizer();
+  let polyUnsub: () => void;
 
   if (port.name === PORTS.EXTENSION) {
-    polyUnsub = subscribePolymesh();
-    loadSchema();
+    // @TODO handle lack of API
+    // @TODO This should subscribe to API change, which includes connection event AND network change
+    // @TODO, on API disconnect, unsubscribe
+    const api = Api.get();
+
+    if (api) {
+      polyUnsub = subscribePolymesh(api);
+      api.on('disconnected', () => {
+        polyUnsub();
+      });
+    }
 
     port.onDisconnect.addListener((): void => {
       console.log(`Disconnected from ${port.name}`);
 
       if (polyUnsub) {
-        polyUnsub()
-          .then(() => console.log('ApiPromise: disconnected')).catch(console.error);
+        polyUnsub();
       }
     });
   }
 
-  port.onDisconnect.addListener((): void => {
-    if (accountsUnsub) accountsUnsub();
-  });
+  // port.onDisconnect.addListener((): void => {
+  //   if (accountsUnsub) accountsUnsub();
+  // });
 
   // message handlers
   port.onMessage.addListener((data): void => {
@@ -58,11 +68,21 @@ chrome.runtime.onConnect.addListener((port): void => {
 // initial setup
 cryptoWaitReady()
   .then((): void => {
-    console.log('crypto initialized');
-
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
 
-    console.log('initialization completed');
+    accountsSynchronizer();
+
+    subscribeIsHydratedAndNetwork((network: NetworkName | undefined) => {
+      console.log('API: subscribeIsHydratedAndNetwork', network);
+
+      if (network) {
+        Api.init(network)
+          .then(() => console.log('Api initialized'))
+          .catch((error) => console.error('Api initialization failed', error));
+      }
+    });
   }, fatalErrorHandler)
   .catch(fatalErrorHandler);
+
+loadSchema();

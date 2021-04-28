@@ -105,10 +105,6 @@ function Extrinsic ({ request }: Props): React.ReactElement<Props> {
       .then((callDetails) => {
         setCallDetails(callDetails);
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
       });
   }, [request]);
 

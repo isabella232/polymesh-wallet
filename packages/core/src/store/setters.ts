@@ -33,11 +33,16 @@ export function apiError () {
   store.dispatch(statusActions.apiError());
 }
 
+function setIsRehydrated () {
+  store.dispatch(statusActions.setRehydrated());
+}
+
 export {
   setNetwork,
   setSelectedAccount,
   renameIdentity,
   resetState,
   toggleIsDeveloper,
-  setError
+  setError,
+  setIsRehydrated
 };

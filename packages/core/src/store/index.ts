@@ -10,6 +10,7 @@ import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
 import { localStorage } from 'redux-persist-webextension-storage';
 
 import rootReducer, { AppReducer, RootState } from './rootReducer';
+import { setIsRehydrated } from './setters';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -48,6 +49,8 @@ if (isDev && (module as any).hot) {
 
 export type Dispatch = typeof store.dispatch
 
-export const persister = persistStore(store);
+export const persister = persistStore(store, null, () => {
+  setIsRehydrated();
+});
 
 export default store;

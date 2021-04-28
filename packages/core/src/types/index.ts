@@ -141,6 +141,7 @@ export type StoreStatus = {
   error: Error | null,
   apiStatus: 'ready' | 'connecting' | 'error',
   populated: Record<string, boolean>,
+  rehydrated: boolean,
 };
 
 export interface UidRecord {

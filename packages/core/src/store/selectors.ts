@@ -4,6 +4,11 @@ import { networkURLs } from '../constants';
 import { DidType, ReversedDidList } from '../types';
 import { RootState } from './rootReducer';
 
+export const rehydrated = createSelector(
+  (state: RootState) => state.status,
+  (status) => !!status && status.rehydrated
+);
+
 export const network = createSelector(
   (state: RootState) => state.network,
   (network) => network
@@ -12,6 +17,12 @@ export const network = createSelector(
 export const selectedNetwork = createSelector(
   network,
   (network) => network.selected
+);
+
+export const selectIsHydratedAndNetwork = createSelector(
+  rehydrated,
+  selectedNetwork,
+  (isHydrated, network) => { return isHydrated ? network : undefined; }
 );
 
 export const networkUrl = createSelector(

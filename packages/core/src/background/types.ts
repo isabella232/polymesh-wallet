@@ -20,7 +20,8 @@ export enum Errors {
   INVALID_TICKER = 'Invalid ticker.',
   INVALID_UID = 'Provided uID string is not a valid v4 uuid.'
 }
-export interface ResponsePolyCallDetails {
+
+export type ResponsePolyCallDetails = Error | {
   networkFee: string;
   protocolFee: string;
   method: string;
