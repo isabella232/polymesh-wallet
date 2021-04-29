@@ -6,6 +6,7 @@ import useIsPopup from '@polymathnetwork/extension-ui/hooks/useIsPopup';
 import { useLedger } from '@polymathnetwork/extension-ui/hooks/useLedger';
 import { setPolyNetwork, togglePolyIsDev, windowOpen } from '@polymathnetwork/extension-ui/messaging';
 import { hasKey } from '@polymathnetwork/extension-ui/styles/utils';
+import { Button } from '@polymathnetwork/polymesh-ui';
 import React, { useCallback, useContext } from 'react';
 import { useHistory } from 'react-router';
 import styled from 'styled-components';
@@ -174,6 +175,7 @@ export default function Accounts (): React.ReactElement {
                   />
                 </Flex>
               </Flex>
+              <Button variant='secondary'>POLYMESH-UI BUTTON</Button>
               {currentAccount && <AccountsHeader account={currentAccount}
                 details={true} />}
             </Header>

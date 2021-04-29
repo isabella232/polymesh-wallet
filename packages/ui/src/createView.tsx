@@ -1,3 +1,4 @@
+import { theme, ThemeProvider } from '@polymathnetwork/polymesh-ui';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -20,20 +21,22 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   ReactDOM.render(
     <Suspense fallback='...'>
-      <Fonts />
-      <View>
-        <HashRouter>
+      <ThemeProvider theme={theme}>
+        <Fonts />
+        <View>
+          <HashRouter>
 
-          <ErrorBoundary
-            FallbackComponent={ErrorFallback}
-            onReset={() => {
-              window.location.hash = '/';
-            }}
-          >
-            <Entry />
-          </ErrorBoundary>
-        </HashRouter>
-      </View>
+            <ErrorBoundary
+              FallbackComponent={ErrorFallback}
+              onReset={() => {
+                window.location.hash = '/';
+              }}
+            >
+              <Entry />
+            </ErrorBoundary>
+          </HashRouter>
+        </View>
+      </ThemeProvider>
     </Suspense>,
     rootElement
   );
