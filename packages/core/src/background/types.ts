@@ -156,6 +156,7 @@ export interface PolyRequestSignatures extends DotRequestSignatures {
   'poly:pri(global.changePass)': [RequestPolyGlobalChangePass, boolean];
   'poly:pri(password.isSet)': [RequestPolyIsPasswordSet, boolean];
   'poly:pri(password.validate)': [RequestPolyValidatePassword, boolean];
+  'poly:pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
   'poly:pub(network.get)': [RequestPolyNetworkGet, NetworkMeta];
   'poly:pub(network.subscribe)': [RequestPolyNetworkMetaSubscribe, boolean, NetworkMeta];
@@ -221,3 +222,7 @@ export type PolyTransportResponseMessage<TMessageType extends PolyMessageTypes> 
     : TMessageType extends PolyMessageTypesWithSubscriptions
       ? PolyTransportResponseMessageSub<TMessageType>
       : never;
+
+export const ALLOWED_PATH = ['/', '/account/import-ledger', '/account/restore/json', '/account/change-password'];
+
+export declare type AllowedPath = typeof ALLOWED_PATH[number];

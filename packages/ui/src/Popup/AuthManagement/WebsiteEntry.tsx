@@ -1,49 +1,48 @@
-import type { ThemeProps } from '../../types';
-
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
+import { SvgWeb } from '@polymathnetwork/extension-ui/assets/images/icons';
 import { Switch } from '@polymathnetwork/extension-ui/components';
+import { Box, Flex, Icon, Text } from '@polymathnetwork/extension-ui/ui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 
-interface Props extends ThemeProps {
-  className?: string;
+import { fontSizes } from '../../components/themeDefinitions';
+
+interface Props {
   info: AuthUrlInfo;
-  toggleAuth: (url: string) => void
+  toggleAuth: (url: string) => void;
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry ({ info, toggleAuth, url }: Props): React.ReactElement<Props> {
   const switchAccess = useCallback(() => {
     toggleAuth(url);
   }, [toggleAuth, url]);
 
   return (
-    <div className={`${className} ${info.isAllowed ? 'allowed' : 'denied'}`}>
-      <div className='url'>
-        {url}
-      </div>
-      <Switch
-        checked={info.isAllowed}
-        checkedLabel={'allowed'}
-        className='info'
-        onChange={switchAccess}
-        uncheckedLabel={'denied'}
-      />
-    </div>
+    <Box px='s'>
+      <Flex direction='row'>
+        <Box pr={10}>
+          <Icon Asset={SvgWeb}
+            color='primary'
+            height={20}
+            width={20} />
+        </Box>
+        <Text lineHeight={fontSizes[4]}
+          style={{ flex: '1 1' }}
+          variant='b2m'>
+          {url}
+        </Text>
+        <Box width='108px'>
+          <Switch
+            checked={info.isAllowed}
+            checkedLabel={'Allowed'}
+            className='info'
+            onChange={switchAccess}
+            uncheckedLabel={'Denied'}
+          />
+        </Box>
+      </Flex>
+    </Box>
   );
 }
 
-export default styled(WebsiteEntry)(({ theme }: Props) => `
-  display: flex;
-  align-items: center;
-
-  .url{
-    flex: 1;
-  }
-
-  &.denied {
-    .slider::before {
-        background-color: ${theme.backButtonBackground};
-      }
-  }
-`);
+export default WebsiteEntry;

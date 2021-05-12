@@ -1,7 +1,7 @@
 import { networkLinks } from '@polymathnetwork/extension-core/constants';
 import { IdentifiedAccount, NetworkName } from '@polymathnetwork/extension-core/types';
 import { SvgDotsVertical, SvgPlus, SvgViewDashboard } from '@polymathnetwork/extension-ui/assets/images/icons';
-import { Option } from '@polymathnetwork/extension-ui/components/OptionSelector';
+import { Option } from '@polymathnetwork/extension-ui/components/OptionSelector/types';
 import useIsPopup from '@polymathnetwork/extension-ui/hooks/useIsPopup';
 import { useLedger } from '@polymathnetwork/extension-ui/hooks/useLedger';
 import { setPolyNetwork, togglePolyIsDev, windowOpen } from '@polymathnetwork/extension-ui/messaging';
@@ -11,13 +11,13 @@ import { useHistory } from 'react-router';
 import styled from 'styled-components';
 
 import { AccountContext, OptionSelector, PolymeshContext } from '../../components';
-import { Box, Checkbox, ContextMenuTrigger, Flex, GrowingButton, Header, Icon, Menu, MenuItem, Text } from '../../ui';
+import { Box, Checkbox, Flex, GrowingButton, Header, Icon, Text } from '../../ui';
 import { AccountsContainer } from './AccountsContainer';
 import { AccountsHeader } from './AccountsHeader';
 import AddAccount from './AddAccount';
 import { NetworkSelector } from './NetworkSelector';
 
-const jsonPath = '/account/restore-json';
+const jsonPath = '/account/restore/json';
 const ledgerPath = '/account/import-ledger';
 
 export default function Accounts (): React.ReactElement {
@@ -62,69 +62,43 @@ export default function Accounts (): React.ReactElement {
     return colors[index % (colors.length - 1)];
   };
 
-  const renderAccountMenuItems = () => {
-    return (
-      <>
-        <Menu id='add_account_menu'>
-          <MenuItem data={{ action: 'new' }}
-            onClick={handleAccountMenuClick}>
-            <Text color='gray.2'
-              variant='b1'>
-              Create new account
-            </Text>
-          </MenuItem>
-          <MenuItem data={{ action: 'fromSeed' }}
-            onClick={handleAccountMenuClick}>
-            <Text color='gray.2'
-              variant='b1'>
-              Restore with recovery phrase
-            </Text>
-          </MenuItem>
-          <MenuItem data={{ action: 'fromJson' }}
-            onClick={handleAccountMenuClick}>
-            <Text color='gray.2'
-              variant='b1'>
-              Import account with JSON file
-            </Text>
-          </MenuItem>
+  const accountMenuItems: Option[] = [
+    {
+      menu: [
+        { label: 'Create new account', value: 'new' },
+        { label: 'Restore with recovery phrase', value: 'fromSeed' },
+        { label: 'Import account with JSON file', value: 'fromJson' },
+        // @TODO to be re-enabled once Polymesh Ledger app is released.
+        // eslint-disable-next-line no-constant-condition
+        ...(false && isLedgerEnabled
+          ? [
+            {
+              label: isLedgerCapable
+                ? 'Attach ledger account'
+                : 'Ledger devices can only be connected with Chrome browser',
+              value: 'fromLedger'
+              // @TODO: add "disabled" option feature in OptionSelector
+              // disabled: !isLedgerCapable
+            },
+            { label: 'Connect Ledger device', value: 'connectLedger' }
+          ]
+          : [])
+      ]
+    }
+  ];
 
-          {
-            // @TODO to be re-enabled once Polymesh Ledger app is released.
-            false &&
-              (isLedgerEnabled
-                ? (
-                  <MenuItem disabled={!isLedgerCapable}
-                    onClick={() => history.push('/account/import-ledger')}>
-                    <Text color='gray.2'
-                      variant='b1'>
-                      {!isLedgerCapable
-                        ? 'Ledger devices can only be connected with Chrome browser'
-                        : 'Attach ledger account'}
-                    </Text>
-                  </MenuItem>
-                )
-                : (
-                  <MenuItem onClick={_onOpenLedgerConnect}>
-                    <Text color='gray.2'
-                      variant='b1'>
-                      {'Connect Ledger device'}
-                    </Text>
-                  </MenuItem>
-                ))
-          }
-        </Menu>
-      </>
-    );
-  };
-
-  const handleAccountMenuClick = (event: string, data: { action: string }) => {
-    switch (data.action) {
+  const handleAccountMenuClick = (value: string) => {
+    switch (value) {
       case 'new':
         return history.push('/account/create');
       case 'fromSeed':
-        return history.push('/account/import-seed');
+        return history.push('/account/restore/seed');
       case 'fromJson':
         return isPopup ? _openJson() : history.push(jsonPath);
+      case 'fromLedger':
+        return history.push('/account/import-ledger');
+      case 'connectLedger':
+        return _onOpenLedgerConnect();
     }
   };
 
@@ -135,7 +109,7 @@ export default function Accounts (): React.ReactElement {
       menu: [
         ...(hasNonHardwareAccount ? [{ label: 'Change password', value: 'changePassword' }] : []),
         { label: 'Open extension in a new tab', value: 'newWindow' },
-        { label: 'Manage website access', value: 'manageUrlAuth' },
+        { label: 'Manage connected dApps', value: 'manageUrlAuth' },
         {
           label: (
             <Flex px='16px'
@@ -156,7 +130,9 @@ export default function Accounts (): React.ReactElement {
   const handleTopMenuSelection = (value: string) => {
     switch (value) {
       case 'changePassword':
-        return history.push('/account/change-password');
+        return isPopup
+          ? windowOpen('/account/change-password')
+          : history.push('/account/change-password');
       case 'newWindow':
         return windowOpen('/');
       case 'toggleIsDev':
@@ -172,7 +148,6 @@ export default function Accounts (): React.ReactElement {
 
   return (
     <>
-      {renderAccountMenuItems()}
       {hierarchy.length === 0
         ? <AddAccount />
         : (
@@ -188,6 +163,7 @@ export default function Accounts (): React.ReactElement {
                   <GrowingButton icon={SvgViewDashboard}
                     onClick={openDashboard} />
                   <OptionSelector
+                    className='settings-menu'
                     onSelect={handleTopMenuSelection}
                     options={topMenuOptions}
                     position='bottom-right'
@@ -204,30 +180,36 @@ export default function Accounts (): React.ReactElement {
               {currentAccount && <AccountsHeader account={currentAccount}
                 details={true} />}
             </Header>
-            <AccountsArea>
-              <Flex justifyContent='space-between'
+            <AccountsArea id='accounts-container'>
+              <Flex
+                justifyContent='space-between'
                 pt='m'
                 px='s'>
                 <Text color='gray.1'
                   variant='c2'>
                 ACCOUNTS
                 </Text>
-                <ContextMenuTrigger id='add_account_menu'
-                  mouseButton={0}>
-                  <Flex justifyContent='center'
-                    style={{ cursor: 'pointer' }}>
-                    <Flex mx='s'>
-                      <Icon Asset={SvgPlus}
-                        color='brandMain'
-                        height={14}
-                        width={14} />
+                <OptionSelector
+                  className='add-key-menu'
+                  onSelect={handleAccountMenuClick}
+                  options={accountMenuItems}
+                  position='bottom-right'
+                  selector={
+                    <Flex justifyContent='center'
+                      style={{ cursor: 'pointer' }}>
+                      <Flex mx='s'>
+                        <Icon Asset={SvgPlus}
+                          color='brandMain'
+                          height={14}
+                          width={14} />
+                      </Flex>
+                      <Text color='brandMain'
+                        variant='b2'>
+                                    Add a key
+                      </Text>
                     </Flex>
-                    <Text color='brandMain'
-                      variant='b2'>
-                    Add a key
-                    </Text>
-                  </Flex>
-                </ContextMenuTrigger>
+                  }
+                />
               </Flex>
               {Object.keys(groupedAccounts)
                 .sort((a) => (a === 'unassigned' ? 1 : -1))
