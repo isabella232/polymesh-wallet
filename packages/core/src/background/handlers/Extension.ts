@@ -26,6 +26,7 @@ import { ALLOWED_PATH, AllowedPath, Errors,
   RequestPolyApproveProof,
   RequestPolyCallDetails,
   RequestPolyChangePass,
+  RequestPolyGetEncryptedUid,
   RequestPolyGetUid,
   RequestPolyGlobalChangePass,
   RequestPolyIdentityRename,
@@ -299,6 +300,18 @@ export default class Extension extends DotExtension {
     return uid;
   }
 
+  private async getEncryptedUid ({ did, network }: RequestPolyGetEncryptedUid): Promise<string> {
+    let encryptedUid = '';
+
+    try {
+      encryptedUid = await this.#state.getEncryptedUid(did, network);
+    } catch (error) {
+      return '';
+    }
+
+    return encryptedUid;
+  }
+
   private _changePassword (pair: KeyringPair, oldPass: string, newPass: string): boolean {
     try {
       if (!pair.isLocked) {
@@ -497,6 +510,9 @@ export default class Extension extends DotExtension {
 
       case 'poly:pri(uid.getUid)':
         return this.getUid(request as RequestPolyGetUid);
+
+      case 'poly:pri(uid.getEncryptedUid)':
+        return this.getEncryptedUid(request as RequestPolyGetUid);
 
       case 'poly:pri(window.open)':
         return this._windowOpen(request as AllowedPath);

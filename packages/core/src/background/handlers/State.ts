@@ -212,6 +212,10 @@ export default class State extends DotState {
     return this.#auxStore.getn(did, network, password);
   }
 
+  public async getEncryptedUid (did: string, network: NetworkName): Promise<string> {
+    return this.#auxStore.getEncryptedUid(did, network);
+  }
+
   public setUid (did: string, network: NetworkName, uid: string, password: string): void {
     this.#auxStore.setn(did, network, uid, password);
     this.updateUidSubject();

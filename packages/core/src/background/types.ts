@@ -131,6 +131,11 @@ export interface RequestPolyGetUid {
   network: NetworkName;
 }
 
+export interface RequestPolyGetEncryptedUid {
+  did: string;
+  network: NetworkName;
+}
+
 export interface PolyRequestSignatures extends DotRequestSignatures {
   // private/internal requests, i.e. from a popup
   'poly:pri(accounts.subscribe)': [RequestPolyAccountsSubscribe, boolean, IdentifiedAccount[]];
@@ -152,6 +157,7 @@ export interface PolyRequestSignatures extends DotRequestSignatures {
   'poly:pri(uid.changePass)': [RequestPolyChangePass, boolean];
   'poly:pri(uid.records.subscribe)': [RequestPolyUidRecordsSubscribe, boolean, UidRecord[]];
   'poly:pri(uid.getUid)': [RequestPolyGetUid, string];
+  'poly:pri(uid.getEncryptedUid)': [RequestPolyGetEncryptedUid, string];
   'poly:pri(global.changePass)': [RequestPolyGlobalChangePass, boolean];
   'poly:pri(password.isSet)': [RequestPolyIsPasswordSet, boolean];
   'poly:pri(password.validate)': [RequestPolyValidatePassword, boolean];

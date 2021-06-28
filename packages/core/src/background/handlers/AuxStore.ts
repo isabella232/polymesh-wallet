@@ -55,6 +55,16 @@ export default class AuxStore extends BaseStore<string> {
     return this._setn(`${network.toLowerCase()}:${did}`, value, password, update);
   }
 
+  public getEncryptedUid (did: string, network: NetworkName): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const key = `${network.toLocaleLowerCase()}:${did}`;
+
+      super.get(key, (ciphertext) => {
+        ciphertext ? resolve(ciphertext) : reject(new Error('Uid not found'));
+      });
+    });
+  }
+
   public async allRecords (): Promise<UidRecord[]> {
     const keys = await this._allKeys();
 

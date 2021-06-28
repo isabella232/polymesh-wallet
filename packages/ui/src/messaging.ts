@@ -399,3 +399,7 @@ export async function globalChangePass (oldPass: string, newPass: string): Promi
 export async function getUid (did: string, network: NetworkName, password: string): Promise<string> {
   return polyMessage('poly:pri(uid.getUid)', { did, network, password });
 }
+
+export async function getEncryptedUid (did: string, network: NetworkName): Promise<string> {
+  return polyMessage('poly:pri(uid.getEncryptedUid)', { did, network });
+}

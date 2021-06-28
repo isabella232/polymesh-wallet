@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
 import { ActionContext, ActivityContext, PolymeshContext } from '../../components';
-import { exportAccount, getUid } from '../../messaging';
+import { exportAccount, getEncryptedUid, getUid } from '../../messaging';
 
 interface AddressState {
   address: string;
@@ -35,14 +35,15 @@ export const ExportAccount: FC = () => {
     try {
       const { exportedJson } = await exportAccount(address, data.currentPassword);
 
-      const accountData = { ...exportedJson };
+      // const accountData = { ...exportedJson };
 
       if (did) {
-        const uid = await getUid(did, networkState.selected, data.currentPassword);
+        const encryptedUid = await getEncryptedUid(did, networkState.selected);
 
-        if (uid) {
-          console.log({ uid });
-          accountData.meta.uid = uid;
+        console.log({ encryptedUid });
+
+        if (encryptedUid) {
+          // add to json download file
         }
       }
 
