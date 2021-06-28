@@ -4,16 +4,19 @@ import React, { FC, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
-import { ActionContext, ActivityContext } from '../../components';
-import { exportAccount } from '../../messaging';
+import { ActionContext, ActivityContext, PolymeshContext } from '../../components';
+import { exportAccount, getUid } from '../../messaging';
 
 interface AddressState {
   address: string;
+  did?: string;
 }
 
 export const ExportAccount: FC = () => {
   const onAction = useContext(ActionContext);
-  const { address } = useParams<AddressState>();
+  const { networkState } = useContext(PolymeshContext);
+
+  const { address, did } = useParams<AddressState>();
 
   const { errors, handleSubmit, register, setError } = useForm({
     defaultValues: {
@@ -32,11 +35,22 @@ export const ExportAccount: FC = () => {
     try {
       const { exportedJson } = await exportAccount(address, data.currentPassword);
 
+      const accountData = { ...exportedJson };
+
+      if (did) {
+        const uid = await getUid(did, networkState.selected, data.currentPassword);
+
+        if (uid) {
+          console.log({ uid });
+          accountData.meta.uid = uid;
+        }
+      }
+
       const element = document.createElement('a');
       const { meta } = exportedJson;
 
       element.href = `data:text/plain;charset=utf-8,${JSON.stringify(exportedJson)}`;
-      element.download = `${meta.name}_exported_account_${Date.now()}.json`;
+      element.download = `${meta.name as string}_exported_account_${Date.now()}.json`;
       element.click();
 
       onAction('/');

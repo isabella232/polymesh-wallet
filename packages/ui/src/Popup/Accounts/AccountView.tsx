@@ -47,7 +47,7 @@ export const AccountView: FC<Props> = ({ account, isSelected }) => {
   const handleMenuClick = (address: string, action: string) => {
     switch (action) {
       case 'export':
-        return history.push(`/account/export/${address}`);
+        return history.push(`/account/export/${address}${did ? `/${did}` : ''}`);
       case 'forget':
         return history.push(`/account/forget/${address}`);
     }

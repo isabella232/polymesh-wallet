@@ -243,7 +243,7 @@ export default function Popup (): React.ReactElement {
                                 <Route path='/account/forget/:address'>
                                   <ForgetAccount />
                                 </Route>
-                                <Route path='/account/export/:address'>
+                                <Route path='/account/export/:address/:did?'>
                                   <ExportAccount />
                                 </Route>
                                 <Route path='/account/restore/:method'>
