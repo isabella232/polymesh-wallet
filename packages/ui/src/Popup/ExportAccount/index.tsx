@@ -4,8 +4,8 @@ import React, { FC, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
-import { ActionContext, ActivityContext, PolymeshContext } from '../../components';
-import { exportAccount, getEncryptedUid } from '../../messaging';
+import { ActionContext, ActivityContext } from '../../components';
+import { exportAccount } from '../../messaging';
 
 interface AddressState {
   address: string;
@@ -14,9 +14,8 @@ interface AddressState {
 
 export const ExportAccount: FC = () => {
   const onAction = useContext(ActionContext);
-  const { networkState } = useContext(PolymeshContext);
 
-  const { address, did } = useParams<AddressState>();
+  const { address } = useParams<AddressState>();
 
   const { errors, handleSubmit, register, setError } = useForm({
     defaultValues: {
@@ -28,22 +27,13 @@ export const ExportAccount: FC = () => {
   const isBusy = useContext(ActivityContext);
 
   const onSubmit = async (data: { [x: string]: string; }) => {
-    if (!address) {
-      return;
-    }
+    if (!address) return;
 
     try {
-      const { exportedJson: polkadotExportedJson } = await exportAccount(address, data.currentPassword);
-      const exportedJson: Record<string, unknown> = { ...polkadotExportedJson };
-
-      if (did) {
-        const encryptedUid = await getEncryptedUid(did, networkState.selected);
-
-        if (encryptedUid) exportedJson.encryptedUid = encryptedUid;
-      }
+      const exportedJson = await exportAccount(address, data.currentPassword);
 
       const element = document.createElement('a');
-      const { meta } = polkadotExportedJson;
+      const { meta } = exportedJson;
 
       element.href = `data:text/plain;charset=utf-8,${JSON.stringify(exportedJson)}`;
       element.download = `${meta.name as string}_exported_account_${Date.now()}.json`;

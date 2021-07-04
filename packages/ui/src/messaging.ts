@@ -28,6 +28,7 @@ import { AllowedPath, PolyMessageTypes,
   PolySubscriptionMessageTypes,
   ProofingRequest,
   ProvideUidRequest,
+  ResponsePolyAccountExport,
   ResponsePolyCallDetails } from '@polymathnetwork/extension-core/background/types';
 import { PORTS } from '@polymathnetwork/extension-core/constants';
 import { IdentifiedAccount, NetworkName, NetworkState, StoreStatus, UidRecord } from '@polymathnetwork/extension-core/types';
@@ -174,10 +175,6 @@ export async function tieAccount (address: string, genesisHash: string | null): 
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }
 
-export async function exportAccount (address: string, password: string): Promise<{ exportedJson: KeyringPair$Json }> {
-  return sendMessage('pri(accounts.export)', { address, password });
-}
-
 export async function validateAccount (address: string, password: string): Promise<boolean> {
   return sendMessage('pri(accounts.validate)', { address, password });
 }
@@ -232,6 +229,10 @@ export async function approveUidProvideRequest (id: string, password: string): P
 
 export async function rejectUidProvideRequest (id: string): Promise<boolean> {
   return polyMessage('poly:pri(uid.provideRequests.reject)', { id });
+}
+
+export async function exportAccount (address: string, password: string): Promise<ResponsePolyAccountExport> {
+  return polyMessage('poly:pri(accounts.export)', { address, password });
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: string): Promise<boolean> {

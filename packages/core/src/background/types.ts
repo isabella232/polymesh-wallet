@@ -1,4 +1,5 @@
-import { AccountJson, RequestSignatures as DotRequestSignatures } from '@polkadot/extension-base/background/types';
+import { AccountJson, RequestAccountExport, RequestSignatures as DotRequestSignatures } from '@polkadot/extension-base/background/types';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { FunctionMetadataLatest } from '@polkadot/types/interfaces';
 import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 import { ORIGINS } from '@polymathnetwork/extension-core/constants';
@@ -27,6 +28,10 @@ export interface ResponsePolyCallDetails {
   section: string;
   meta: FunctionMetadataLatest;
   args: AnyJson;
+}
+
+export interface ResponsePolyAccountExport extends KeyringPair$Json {
+  encryptedUids: Record<string, string>[];
 }
 
 export type RequestPolyAccountsSubscribe = null;
@@ -162,6 +167,7 @@ export interface PolyRequestSignatures extends DotRequestSignatures {
   'poly:pri(password.isSet)': [RequestPolyIsPasswordSet, boolean];
   'poly:pri(password.validate)': [RequestPolyValidatePassword, boolean];
   'poly:pri(window.open)': [AllowedPath, boolean];
+  'poly:pri(accounts.export)': [RequestAccountExport, ResponsePolyAccountExport];
   // public/external requests, i.e. from a page
   'poly:pub(network.get)': [RequestPolyNetworkGet, NetworkMeta];
   'poly:pub(network.subscribe)': [RequestPolyNetworkMetaSubscribe, boolean, NetworkMeta];

@@ -1,5 +1,5 @@
 import DotExtension from '@polkadot/extension-base/background/handlers/Extension';
-import { MessageTypes, RequestRpcUnsubscribe } from '@polkadot/extension-base/background/types';
+import { MessageTypes, RequestAccountExport, RequestRpcUnsubscribe } from '@polkadot/extension-base/background/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
@@ -36,7 +36,7 @@ import { ALLOWED_PATH, AllowedPath, Errors,
   RequestPolyRejectProof,
   RequestPolySelectedAccountSet,
   RequestPolyValidatePassword,
-  ResponsePolyCallDetails } from '../types';
+  ResponsePolyAccountExport, ResponsePolyCallDetails } from '../types';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 import { getScopeAttestationProof } from './utils';
@@ -438,6 +438,26 @@ export default class Extension extends DotExtension {
     return true;
   }
 
+  private async accountExport ({ address, password }: RequestAccountExport): Promise<ResponsePolyAccountExport> {
+    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
+
+    const uidRecords = await this.#state.allUidRecords();
+    const encryptedUids = await Promise.all(
+      uidRecords.map(async ({ did, network }) => {
+        const encryptedUid = await this.#state.getEncryptedUid(did, network);
+
+        return {
+          [`${network.toLowerCase()}`]: encryptedUid
+        };
+      })
+    );
+
+    return {
+      ...exportedJson,
+      encryptedUids
+    };
+  }
+
   public async _handle<TMessageType extends PolyMessageTypes> (
     id: string,
     type: TMessageType,
@@ -513,6 +533,9 @@ export default class Extension extends DotExtension {
 
       case 'poly:pri(uid.getEncryptedUid)':
         return this.getEncryptedUid(request as RequestPolyGetUid);
+
+      case 'poly:pri(accounts.export)':
+        return this.accountExport(request as RequestAccountExport);
 
       case 'poly:pri(window.open)':
         return this._windowOpen(request as AllowedPath);
