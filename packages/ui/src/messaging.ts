@@ -19,7 +19,7 @@ import chrome from '@polkadot/extension-inject/chrome';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { AllowedPath, PolyMessageTypes,
+import { AllowedPath, EncryptedUids, PolyMessageTypes,
   PolyMessageTypesWithNoSubscriptions,
   PolyMessageTypesWithNullRequest,
   PolyMessageTypesWithSubscriptions,
@@ -385,8 +385,8 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
+export async function jsonRestore (file: KeyringPair$Json & EncryptedUids, password: string): Promise<void> {
+  return polyMessage('poly:pri(json.restore)', { file, password });
 }
 
 export async function changePassword (address: string, oldPass: string, newPass: string): Promise<boolean> {

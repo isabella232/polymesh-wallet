@@ -31,8 +31,10 @@ export interface ResponsePolyCallDetails {
 }
 
 export interface ResponsePolyAccountExport extends KeyringPair$Json {
-  encryptedUids: Record<string, string>[];
+  encryptedUids: EncryptedUids;
 }
+
+export type EncryptedUids = Record<string, string>[];
 
 export type RequestPolyAccountsSubscribe = null;
 
@@ -141,6 +143,11 @@ export interface RequestPolyGetEncryptedUid {
   network: NetworkName;
 }
 
+export interface RequestPolyJsonRestore {
+  file: KeyringPair$Json & EncryptedUids;
+  password: string;
+}
+
 export interface PolyRequestSignatures extends DotRequestSignatures {
   // private/internal requests, i.e. from a popup
   'poly:pri(accounts.subscribe)': [RequestPolyAccountsSubscribe, boolean, IdentifiedAccount[]];
@@ -168,6 +175,7 @@ export interface PolyRequestSignatures extends DotRequestSignatures {
   'poly:pri(password.validate)': [RequestPolyValidatePassword, boolean];
   'poly:pri(window.open)': [AllowedPath, boolean];
   'poly:pri(accounts.export)': [RequestAccountExport, ResponsePolyAccountExport];
+  'poly:pri(json.restore)': [RequestPolyJsonRestore, void];
   // public/external requests, i.e. from a page
   'poly:pub(network.get)': [RequestPolyNetworkGet, NetworkMeta];
   'poly:pub(network.subscribe)': [RequestPolyNetworkMetaSubscribe, boolean, NetworkMeta];

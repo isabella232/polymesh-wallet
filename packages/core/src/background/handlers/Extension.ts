@@ -537,6 +537,11 @@ export default class Extension extends DotExtension {
       case 'poly:pri(accounts.export)':
         return this.accountExport(request as RequestAccountExport);
 
+      case 'poly:pri(json.restore)':
+        console.log({ request });
+
+        return;
+
       case 'poly:pri(window.open)':
         return this._windowOpen(request as AllowedPath);
 
