@@ -6,6 +6,7 @@ export type ButtonIconPosition = 'left' | 'right' | 'top' | 'bottom';
 export type variants =
   | 'primary'
   | 'secondary'
+  | 'special'
   | 'ghost'
   | 'ghostSecondary'
   | 'transparent'

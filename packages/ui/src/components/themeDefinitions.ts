@@ -176,7 +176,12 @@ export const shadows = {
   2: '0px 2px 4px rgba(30, 30, 30, 0.16), 0px 3px 6px rgba(30, 30, 30, 0.12);',
   3: '0px 10px 20px rgba(30, 30, 30, 0.15), 0px 3px 6px rgba(30, 30, 30, 0.1);',
   4: '0px 15px 25px rgba(30, 30, 30, 0.15), 0px 5px 10px rgba(30, 30, 30, 0.05);',
-  5: '0px 20px 40px rgba(30, 30, 30, 0.1);'
+  5: '0px 20px 40px rgba(30, 30, 30, 0.1);',
+  xs: '0px 1px 3px rgba(30, 30, 30, 0.12), 0px 1px 2px rgba(30, 30, 30, 0.24);',
+  s: '0px 2px 4px rgba(30, 30, 30, 0.16), 0px 3px 6px rgba(30, 30, 30, 0.12);',
+  m: '0px 10px 20px rgba(30, 30, 30, 0.15), 0px 3px 6px rgba(30, 30, 30, 0.1);',
+  l: '0px 15px 25px rgba(30, 30, 30, 0.15), 0px 5px 10px rgba(30, 30, 30, 0.05);',
+  xl: '0px 20px 40px rgba(30, 30, 30, 0.1);'
 };
 
 export const radii = {

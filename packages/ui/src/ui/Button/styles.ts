@@ -36,6 +36,20 @@ export const getVariant: Styles<ButtonProps> = ({ theme, variant = ButtonDefault
         background: theme.colors.white
       }
     },
+    special: {
+      backgroundColor: theme.colors.white,
+      color: theme.colors.gray1,
+      boxShadow: theme.shadows.s,
+      '&:hover': {
+        boxShadow: theme.shadows.m
+      },
+      '&:active': {
+        boxShadow: 'none'
+      },
+      '&:disabled': {
+        background: theme.colors.gray7
+      }
+    },
     ghost: {
       backgroundColor: 'transparent',
       color: theme.colors.highlightText,

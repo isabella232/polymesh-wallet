@@ -109,7 +109,7 @@ function AddAccount (): React.ReactElement {
             <Button disabled={!(policyAccepted && termsAccepted)}
               fluid
               onClick={onConnectLedger}
-              variant='secondary'>
+              variant='special'>
               <Box mr='s'>
                 <Icon Asset={SvgLedger}
                   height={24}
