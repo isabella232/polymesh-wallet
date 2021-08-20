@@ -1,7 +1,8 @@
+import { SvgLedger } from '@polymathnetwork/extension-ui/assets/images/icons';
 import SvgWalletLogo from '@polymathnetwork/extension-ui/assets/images/SvgWalletLogo';
-// import useIsPopup from '@polymathnetwork/extension-ui/hooks/useIsPopup';
-// import { useLedger } from '@polymathnetwork/extension-ui/hooks/useLedger';
-// import { windowOpen } from '@polymathnetwork/extension-ui/messaging';
+import useIsPopup from '@polymathnetwork/extension-ui/hooks/useIsPopup';
+import { useLedger } from '@polymathnetwork/extension-ui/hooks/useLedger';
+import { windowOpen } from '@polymathnetwork/extension-ui/messaging';
 import React, { useCallback, useContext, useState } from 'react';
 
 import { ActionContext } from '../../components';
@@ -11,24 +12,24 @@ function AddAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  // const isPopup = useIsPopup();
-  // const { isLedgerEnabled } = useLedger();
+  const isPopup = useIsPopup();
+  const { isLedgerEnabled } = useLedger();
 
-  // const _onOpenLedgerConnect = useCallback(
-  //   () => windowOpen('/account/import-ledger'),
-  //   []
-  // );
+  const _onOpenLedgerConnect = useCallback(
+    () => windowOpen('/account/import-ledger'),
+    []
+  );
   const onCreateAccount = useCallback((): void => onAction('/account/create'), [onAction]);
 
   const onImportAccount = useCallback((): void => onAction('/account/restore/seed'), [onAction]);
 
-  // const onConnectLedger = useCallback((): void => {
-  //   if (!isLedgerEnabled && isPopup) {
-  //     _onOpenLedgerConnect().then(console.log).catch(console.error);
-  //   } else {
-  //     onAction('/account/import-ledger');
-  //   }
-  // }, [_onOpenLedgerConnect, isLedgerEnabled, isPopup, onAction]);
+  const onConnectLedger = useCallback((): void => {
+    if (!isLedgerEnabled && isPopup) {
+      _onOpenLedgerConnect().then(console.log).catch(console.error);
+    } else {
+      onAction('/account/import-ledger');
+    }
+  }, [_onOpenLedgerConnect, isLedgerEnabled, isPopup, onAction]);
 
   return (
     <>
@@ -107,15 +108,6 @@ function AddAccount (): React.ReactElement {
             mx='xs'>
             <Button disabled={!(policyAccepted && termsAccepted)}
               fluid
-              onClick={onImportAccount}
-              variant='secondary'>
-              Restore account
-            </Button>
-          </Box>
-          {/* <Box mt='s'
-            mx='xs'>
-            <Button disabled={!(policyAccepted && termsAccepted)}
-              fluid
               onClick={onConnectLedger}
               variant='secondary'>
               <Box mr='s'>
@@ -125,7 +117,16 @@ function AddAccount (): React.ReactElement {
               </Box>
               Connect your Ledger
             </Button>
-          </Box> */}
+          </Box>
+          <Box mt='s'
+            mx='xs'>
+            <Button disabled={!(policyAccepted && termsAccepted)}
+              fluid
+              onClick={onImportAccount}
+              variant='secondary'>
+              Restore account
+            </Button>
+          </Box>
         </Box>
       </Flex>
     </>
