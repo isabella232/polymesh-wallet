@@ -5,6 +5,7 @@ export const networkURLs: Record<NetworkName, string> = {
   alcyone: 'wss://alcyone-rpc.polymesh.live',
   pmf: 'wss://pmf.polymath.network',
   pme: 'wss://pme.polymath.network',
+  dev: 'wss://dev.polymesh.live',
   local: 'ws://localhost:9944'
 };
 
@@ -13,26 +14,33 @@ export const networkLabels: Record<NetworkName, string> = {
   alcyone: 'Alcyone Testnet',
   pmf: 'PMF',
   pme: 'PME',
+  dev: 'Development',
   local: 'Local node'
 };
 
 export const networkIsDev: Record<NetworkName, boolean> = {
+  itn: false,
   alcyone: false,
   pmf: true,
   pme: true,
-  local: true,
-  itn: false
+  dev: true,
+  local: true
 };
 
 export const dynamicSchemaEnabled: Record <NetworkName, boolean> = {
+  itn: true,
   alcyone: true,
   pmf: true,
   pme: true,
-  local: false,
-  itn: true
+  dev: true,
+  local: false
 };
 
 export const networkLinks: Record<NetworkName, Record<LinkName, string>> = {
+  itn: {
+    dashboard: 'https://itn-dashboard.polymesh.live/',
+    explorer: 'https://itn-app.polymesh.live/#/explorer'
+  },
   alcyone: {
     dashboard: 'https://alcyone-dashboard.polymesh.live/',
     explorer: 'http://18.223.97.65/'
@@ -45,13 +53,13 @@ export const networkLinks: Record<NetworkName, Record<LinkName, string>> = {
     dashboard: 'https://polymesh-dashboard-dev.herokuapp.com/',
     explorer: 'http://ec2-3-15-5-195.us-east-2.compute.amazonaws.com'
   },
-  local: {
+  dev: {
     dashboard: 'unknown',
     explorer: 'unknown'
   },
-  itn: {
-    dashboard: 'https://itn-dashboard.polymesh.live/',
-    explorer: 'https://itn-app.polymesh.live/#/explorer'
+  local: {
+    dashboard: 'unknown',
+    explorer: 'unknown'
   }
 };
 

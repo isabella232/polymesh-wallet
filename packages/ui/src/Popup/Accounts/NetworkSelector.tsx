@@ -24,6 +24,7 @@ const NETWORK_COLORS: Record<NetworkName, { backgrounds: string[]; foreground: s
   },
   pmf: DEV_NETWORK_COLORS,
   pme: DEV_NETWORK_COLORS,
+  dev: DEV_NETWORK_COLORS,
   local: DEV_NETWORK_COLORS
 };
 
